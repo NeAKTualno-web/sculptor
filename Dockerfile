@@ -53,6 +53,6 @@ VOLUME [ "/app/data" ]
 VOLUME [ "/app/logs" ]
 EXPOSE 6665/tcp
 
-ENTRYPOINT ["sh", "-c", "cp /etc/secrets/*config*.toml /app/config.toml 2>/dev/null || cp /etc/secrets/* /app/config.toml 2>/dev/null || true; ./sculptor"]
+ENTRYPOINT ["sh", "-c", "echo '=== SECRETS CONTENTS ===' && ls -la /etc/secrets/ || true; cp /etc/secrets/*config*.toml /app/config.toml 2>/dev/null || cp /etc/secrets/* /app/config.toml 2>/dev/null || true; ./sculptor"]
 
 
