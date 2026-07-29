@@ -77,7 +77,7 @@ impl From<BannedPlayer> for Userinfo {
 
 impl Config {
     pub fn parse(path: PathBuf) -> Self {
-        let mut file = std::fs::File::open(path).expect("Access denied or file doesn't exists!");
+        let mut file = std::fs::File::open("config.toml").expect("Access denied or file doesn't exists!");
         let mut data = String::new();
         file.read_to_string(&mut data).unwrap();
 
