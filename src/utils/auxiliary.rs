@@ -28,12 +28,12 @@ pub async fn update_advanced_users(
 ) {
     let (tx, mut rx) = tokio::sync::mpsc::channel::<notify::Result<Event>>(1);
     tx.send(Ok(notify::Event::default())).await.unwrap();
-    let mut watcher = notify::PollWatcher::new(
-        move |res| {
-            tx.blocking_send(res).unwrap();
-        },
-        notify::Config::default(),
-    ).unwrap();
+            let mut watcher = notify::PollWatcher::new(
+            move |res| {
+                let _ = tx.try_send(res);
+            },
+            notify::Config::default(),
+).unwrap();
     watcher.watch(&path, notify::RecursiveMode::NonRecursive).unwrap();
 
     let mut first_time = true;
