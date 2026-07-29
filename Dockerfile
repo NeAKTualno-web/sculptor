@@ -52,4 +52,5 @@ VOLUME [ "/app/data" ]
 VOLUME [ "/app/logs" ]
 EXPOSE 6665/tcp
 
-ENTRYPOINT [ "./sculptor" ]
+ENTRYPOINT ["sh", "-c", "cp /etc/secrets/config.toml ./config.toml && ./sculptor"]
+
