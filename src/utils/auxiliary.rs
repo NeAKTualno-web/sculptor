@@ -77,13 +77,15 @@ pub async fn update_bans_from_minecraft(
     umanager: Arc<UManager>,
     sessions: Arc<dashmap::DashMap<Uuid, tokio::sync::mpsc::Sender<crate::api::figura::SessionMessage>>>
 ) {
-    let path = folder.join("banned-players.json");
-    let mut file = tokio::fs::File::open(path.clone()).await.expect("Access denied or banned-players.json doesn't exists!");
-    let mut data = String::new();
-    // vars end
-
-    // initialize
-    file.read_to_string(&mut data).await.expect("cant read banned-players.json");
+            let path = folder.join("banned-players.json");
+        let path_clone = path.clone();
+        let data = tokio::task::spawn_blocking(move || {
+            let mut file = std::fs::File::open(path_clone).expect("Access denied or banned-players.json doesn't exist");
+            let mut data = String::new();
+            file.read_to_string(&mut data).expect("cant read banned-players.json");
+            data
+        }).await.unwrap();
+    
     let mut old_bans: Vec<BannedPlayer> = serde_json::from_str(&data).expect("cant parse banned-players.json");
 
     if !old_bans.is_empty() {
