@@ -109,9 +109,14 @@ pub async fn update_bans_from_minecraft(
 
     // old_bans
     while rx.recv().await.is_some() {
-        let mut file = tokio::fs::File::open(path.clone()).await.expect("Access denied or file doesn't exists!");
-        let mut data = String::new();
-        file.read_to_string(&mut data).await.expect("cant read banned-players.json");
+                    let path_for_task = path.clone();
+            let data = tokio::task::spawn_blocking(move || {
+                let mut file = std::fs::File::open(path_for_task).expect("Access denied or file doesn't exists!");
+                let mut data = String::new();
+                file.read_to_string(&mut data).expect("cant read banned-players.json");
+                data
+            }).await.unwrap();
+        
         let new_bans: Vec<BannedPlayer> = if let Ok(res) = serde_json::from_str(&data) { res } else {
             tracing::error!("Error occured while parsing a banned-players.json");
             continue;
