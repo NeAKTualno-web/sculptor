@@ -44,6 +44,8 @@ RUN . /tmp/builder.env && \
 FROM alpine:${ALPINE_VERSION:-latest} AS runtime
 WORKDIR /app
 COPY --from=builder /tmp/build-output/sculptor /app/sculptor
+RUN ln -s /etc/secrets/config.toml ./config.toml
+
 
 RUN apk add --no-cache tzdata
 ENV TZ=Etc/UTC
@@ -52,5 +54,6 @@ VOLUME [ "/app/data" ]
 VOLUME [ "/app/logs" ]
 EXPOSE 6665/tcp
 
-ENTRYPOINT ["sh", "-c", "cp /etc/secrets/config.toml ./config.toml && ./sculptor"]
+ENTRYPOINT [ "./sculptor" ]
+
 
