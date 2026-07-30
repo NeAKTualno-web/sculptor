@@ -115,7 +115,7 @@ pub async fn has_joined(
     server_id: &str,
     username: &str,
 ) -> anyhow::Result<Option<(Uuid, AuthProvider)>> {
-    let offline_uuid = Uuid::new_v5(&Uuid::NAMESPACE_DNS, username.as_bytes());
+    let offline_uuid = Uuid::new_v3(&Uuid::NAMESPACE_DNS, username.as_bytes());
     Ok(Some((offline_uuid, AuthProvider {
         name: "OfflineMode".to_string(),
         url: "".to_string(),
