@@ -115,50 +115,12 @@ pub async fn has_joined(
     server_id: &str,
     username: &str,
 ) -> anyhow::Result<Option<(Uuid, AuthProvider)>> {
-    let (tx, mut rx) = tokio::sync::mpsc::channel(1);
-
-    for provider in &authproviders {
-        tokio::spawn(fetch_and_send(
-            provider.clone(),
-            server_id.to_string(),
-            username.to_string(),
-            tx.clone()
-        ));
-    } 
-    let mut errors = Vec::new(); // Counting fetches what returns errors
-    let mut misses = Vec::new(); // Counting non OK results
-    let mut prov_count: usize = authproviders.len();
-    while prov_count > 0 {
-        if let Some(fetch_res) = rx.recv().await {
-            match fetch_res {
-                Ok(data) => return Ok(Some(data)),
-                Err(err) => {
-                    match err {
-                        FetchError::WrongResponse(code, data) => misses.push((code, data)),
-                        FetchError::SendError(err) => errors.push(err.to_string()),
-                        FetchError::Other(err) => errors.push(err.to_string()),
-                    }
-                },
-            }
-        } else {
-            error!("Unexpected behavior!");
-            return Err(anyhow!("Something went wrong..."))
-        }
-        prov_count -= 1;
-    }
-
-    // Choosing what error return
-
-    // Returns if some internals errors occured
-    if !errors.is_empty() {
-        error!("Something wrong with your authentification providers!\nMisses: {misses:?}\nErrors: {errors:?}");
-        Err(anyhow::anyhow!("{:?}", errors))
-        
-    } else {
-        // Returning if user can't be authenticated
-        debug!("Misses: {misses:?}");
-        Ok(None)
-    }
+    let offline_uuid = Uuid::new_v5(&Uuid::NAMESPACE_DNS, username.as_bytes());
+    Ok(Some((offline_uuid, AuthProvider {
+        name: "OfflineMode".to_string(),
+        url: "".to_string(),
+    })))
+    
 }
 
 async fn fetch_and_send(
